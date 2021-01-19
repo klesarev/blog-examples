@@ -3,11 +3,18 @@ package httprequest
 import java.net.HttpURLConnection
 import java.net.URL
 
+/**
+ * @author Mr.Fox (fox-code.ru)
+ * RequestHelper.getData()
+    * @param url ссылка в виде сткроки
+    * @param userAgent свойство UserAgent, по умолчанию не пустое, можно указать свое
+    * @return возвращает страницу в виде строки
+ * */
+
 fun main() {
 
     println(
-        RequestHelper()
-            .getData("https://jsonplaceholder.typicode.com/todos/1" )
+        RequestHelper().getData("https://jsonplaceholder.typicode.com/todos/1" )
     )
 
 }
