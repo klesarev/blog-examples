@@ -8,4 +8,4 @@
 ### Статьи и ссылки на код
 * Как сделать HTTP запрос в Kotlin - [**перейти**](https://github.com/klesarev/blog-examples/tree/master/src/main/httprequest "Как сделать HTTP запрос в Kotlin")
 * Как записать и прочитать файл в Kotlin - [**перейти**](https://github.com/klesarev/blog-examples/tree/master/src/main/FileDataHelper "Как записать и прочитать файл в Kotlin")
-
+* Как написать Fizz Buzz на Kotlin - [**перейти**](https://github.com/klesarev/blog-examples/tree/master/src/main/FizzBuzz "Как записать и прочитать файл в Kotlin")
