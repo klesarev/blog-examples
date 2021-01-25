@@ -1,7 +1,11 @@
 package HttpRequest
 
+import kotlinx.coroutines.*
 import java.net.HttpURLConnection
 import java.net.URL
+import kotlin.concurrent.thread
+import kotlin.coroutines.resume
+import kotlin.coroutines.suspendCoroutine
 
 /**
  * @author Mr.Fox (fox-code.ru)
@@ -11,12 +15,10 @@ import java.net.URL
     * @return возвращает страницу в виде строки
  * */
 
-fun main() {
-
+suspend fun main() {
     println(
-        RequestHelper().getData("https://jsonplaceholder.typicode.com/todos/1" )
+        RequestHelper().getDataAsync("https://jsonplaceholder.typicode.com/todos/1")
     )
-
 }
 
 class RequestHelper {
@@ -42,4 +44,25 @@ class RequestHelper {
         }
         return sb.toString()
     }
+    suspend fun getDataAsync(url: String, userAgent: String = userAgentHeader): String {
+
+        return suspendCoroutine { continuation ->
+            Thread(Runnable {
+                
+                with(URL(url).openConnection() as HttpURLConnection){
+                    addRequestProperty("User-Agent", userAgent)
+                    try {
+                        continuation.resume(inputStream.bufferedReader().readText())
+                    } catch (ex: Exception) {
+                        ex.printStackTrace()
+                    } finally {
+                        disconnect()
+                    }
+                }
+
+            }).start()
+        }
+
+    }
+
 }
