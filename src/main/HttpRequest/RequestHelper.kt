@@ -15,9 +15,9 @@ import kotlin.coroutines.suspendCoroutine
     * @return возвращает страницу в виде строки
  * */
 
-suspend fun main() {
+fun main() {
     println(
-        RequestHelper().getDataAsync("https://jsonplaceholder.typicode.com/todos/1")
+        RequestHelper().getData("https://jsonplaceholder.typicode.com/todos/1")
     )
 }
 
@@ -43,26 +43,6 @@ class RequestHelper {
 
         }
         return sb.toString()
-    }
-    suspend fun getDataAsync(url: String, userAgent: String = userAgentHeader): String {
-
-        return suspendCoroutine { continuation ->
-            Thread(Runnable {
-                
-                with(URL(url).openConnection() as HttpURLConnection){
-                    addRequestProperty("User-Agent", userAgent)
-                    try {
-                        continuation.resume(inputStream.bufferedReader().readText())
-                    } catch (ex: Exception) {
-                        ex.printStackTrace()
-                    } finally {
-                        disconnect()
-                    }
-                }
-
-            }).start()
-        }
-
     }
 
 }
