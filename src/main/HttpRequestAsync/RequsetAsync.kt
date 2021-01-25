@@ -31,8 +31,10 @@ class RequsetAsync {
                 with(URL(url).openConnection() as HttpURLConnection){
                     addRequestProperty("User-Agent", userAgent)
                     try {
+                        // возвращаем результат если все ок
                         continuation.resume(inputStream.bufferedReader().readText())
                     } catch (ex: Exception) {
+                        // возвращаем ошибку
                         continuation.resumeWithException(ex)
                     } finally {
                         disconnect()
