@@ -1,9 +1,11 @@
 package HttpRequestAsync
 
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.runBlocking
 import java.net.HttpURLConnection
 import java.net.URL
 import kotlin.coroutines.resume
+import kotlin.coroutines.resumeWithException
 import kotlin.coroutines.suspendCoroutine
 
 fun main() {
@@ -31,7 +33,7 @@ class RequsetAsync {
                     try {
                         continuation.resume(inputStream.bufferedReader().readText())
                     } catch (ex: Exception) {
-                        ex.printStackTrace()
+                        continuation.resumeWithException(ex)
                     } finally {
                         disconnect()
                     }
