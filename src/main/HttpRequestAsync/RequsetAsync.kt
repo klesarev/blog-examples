@@ -1,12 +1,15 @@
 package HttpRequestAsync
 
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.runBlocking
 import java.net.HttpURLConnection
+import java.net.URI
 import java.net.URL
+import java.net.http.HttpClient
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 import kotlin.coroutines.suspendCoroutine
+import java.net.http.HttpResponse.BodyHandlers
+import java.net.http.HttpRequest
 
 fun main() {
 
@@ -14,6 +17,10 @@ fun main() {
         val data = RequsetAsync().getDataAsync("https://jsonplaceholder.typicode.com/todos/1")
         println(data)
     }
+
+    println(
+        getHttpAsync("https://jsonplaceholder.typicode.com/todos/1")
+    )
 
 }
 
@@ -45,4 +52,15 @@ class RequsetAsync {
         }
 
     }
+}
+
+fun getHttpAsync(link: String): String? {
+    val client = HttpClient.newBuilder().build()
+    val request = HttpRequest.newBuilder()
+        .uri(URI.create(link))
+        .build()
+
+    return client.sendAsync(request, BodyHandlers.ofString())
+        .join()
+        .body()
 }
