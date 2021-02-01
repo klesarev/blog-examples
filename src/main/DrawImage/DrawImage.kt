@@ -8,13 +8,11 @@ import javax.imageio.ImageIO
 
 import java.io.File
 import java.lang.Exception
-import java.math.BigInteger
-import java.security.MessageDigest
 
 /*
 * https://stackoverflow.com/questions/16497390/illegalargumentexception-color-parameter-outside-of-expected-range-red-green-b
 * But color.getRed() (Blue, Green) can return a value up to 255. So you can get the following
- */
+*/
 
 fun main() {
 
@@ -23,8 +21,8 @@ fun main() {
         listOf(0,2,2,0,0,0,0,2,2,0),
         listOf(2,1,1,2,0,0,2,1,1,2),
         listOf(2,1,1,1,2,2,1,1,1,2),
-        listOf(2,1,1,1,1,1,1,0,1,2),
-        listOf(2,1,1,1,1,1,1,0,1,2),
+        listOf(2,1,1,1,1,1,1,1,1,2),
+        listOf(2,1,1,1,1,1,1,1,1,2),
         listOf(2,1,1,1,1,1,1,1,1,2),
         listOf(0,2,1,1,1,1,1,1,2,0),
         listOf(0,0,2,1,1,1,1,2,0,0),
@@ -32,9 +30,9 @@ fun main() {
         listOf(0,0,0,0,2,2,0,0,0,0)
     )
 
-    val imggg = BufferedImage(100,100,TYPE_INT_RGB)
-    drawIcon(map,imggg)
-    writeImage(imggg,"D:/heart.bmp")
+    val heartImage = BufferedImage(100,100,TYPE_INT_RGB)
+    drawIcon(map,heartImage)
+    writeImage(heartImage,"D:/heart.bmp")
 
 }
 
@@ -43,16 +41,17 @@ fun drawIconFromText() {
 }
 
 fun drawIcon(pixels: Array<List<Int>>, image: BufferedImage) {
-    pixels.forEachIndexed { posY, elementY ->
-        elementY.forEachIndexed { posX, elementX ->
-            if (elementX==1) {
-                drawTile(posX*10,posY*10,10,255,2,0,image)
-            } else if (elementX==2){
-                drawTile(posX*10,posY*10,10,0,0,0,image)
-            } else drawTile(posX*10,posY*10,10,255,255,255,image)
+    pixels.forEachIndexed { posY, rowElement ->
+        rowElement.forEachIndexed { posX, colElement ->
+            when(colElement) {
+                1 -> drawTile(posX*10,posY*10,10,255,2,0,image)
+                2 -> drawTile(posX*10,posY*10,10,0,0,0,image)
+                else -> drawTile(posX*10,posY*10,10,255,255,255,image)
+            }
         }
     }
 }
+
 fun writeImage(img: BufferedImage, file: String) {
     try {
         Thread(Runnable {
@@ -88,4 +87,11 @@ fun drawRandomImage(width: Int, height: Int, redRng: Int = 256, greenRng: Int = 
         }
     }
     writeImage(img,"D:/randImage.bmp")
+}
+
+var randColor = { red: Int, green: Int, blue: Int ->
+    val R = if (red <= 0 || red > 255) 0 else Random.nextInt(0, red)
+    val G = if (green <=0 || green > 255) 0 else Random.nextInt(0, green)
+    val B = if (blue <=0 || blue > 255) 0 else Random.nextInt(0, blue)
+    Color(R,G,B)
 }

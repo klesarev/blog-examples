@@ -7,9 +7,13 @@ import kotlin.random.Random
 
 
 fun main(vararg args: String ) {
-    val arr: List<String> = listOf("Ford", "Mazda")
+    val arr = listOf("Ford", "Mazda", "Kia", 765, true)
         println(md5("Ford"))
     println("1083da2df15d6ebfe62186418a76863")
+    val pc = listOf("Dell", "Mac", "Lenovo")
+    val fib = listOf(1, 1, 2, 3, 5, 8, 13)
+    println("PS: ${pc.getFirst}, Fib: ${fib.getFirst}")
+
 
 }
 
@@ -34,8 +38,17 @@ var miletokm = { miles: Int ->
 
 
 // generics
-fun <T>Iterable<T>.az(): String {
+fun <T>Iterable<T>.stringify(): String {
     return this.joinToString(" ")
 }
-val <T>List<T>.getF: T
+val <T>List<T>.getFirst: T
     get() = this[0]
+
+
+
+class Gangster(val id: Int, val name: String) {
+    fun getInfo():String {
+        return "ID: $id, Name: $name"
+    }
+}
+class Cage(var gangster: Gangster, val size: Int)
