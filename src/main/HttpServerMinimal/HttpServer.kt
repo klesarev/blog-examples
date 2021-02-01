@@ -49,7 +49,7 @@ fun getParams(paramString: String): Map<String,String> {
         .substring(paramString.indexOf("?")+1, paramString.length)
         .split(Regex("&"))
         .forEach {
-            params.put(it.split("=")[0],it.split("=")[1])
+            params[it.split("=")[0]] = it.split("=")[1]
         }
 
     return params.toMap()

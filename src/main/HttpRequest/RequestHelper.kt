@@ -17,7 +17,8 @@ import kotlin.coroutines.suspendCoroutine
 
 fun main() {
     println(
-        RequestHelper().getData("https://jsonplaceholder.typicode.com/todos/1")
+        //RequestHelper().getData("https://jsonplaceholder.typicode.com/todos/1")
+        RequestHelper().getData("http://127.0.0.1:8080/api?language=Kotlin&level=middle&port=8080")
     )
 }
 
@@ -27,14 +28,13 @@ class RequestHelper {
             "Chrome/87.0.4280.141 Safari/537.36"
 
     fun getData(url: String, userAgent: String = userAgentHeader): String {
-        val sb = StringBuilder()
+        lateinit var text: String
 
         with(URL(url).openConnection() as HttpURLConnection) {
             addRequestProperty("User-Agent", userAgent)
 
             try {
-                val text = inputStream.bufferedReader().readText()
-                sb.append(text)
+                text = inputStream.bufferedReader().readText()
             } catch (ex: Exception) {
                 ex.printStackTrace()
             } finally {
@@ -42,7 +42,7 @@ class RequestHelper {
             }
 
         }
-        return sb.toString()
+        return text
     }
 
 }
