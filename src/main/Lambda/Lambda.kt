@@ -1,20 +1,95 @@
 package Lambda
 
+import HttpRequest.RequestHelper
+import kotlinx.coroutines.*
+import kotlinx.coroutines.flow.*
 import java.awt.Color
 import java.math.BigInteger
 import java.security.MessageDigest
 import kotlin.random.Random
+import kotlin.system.measureTimeMillis
 
 
-fun main(vararg args: String ) {
-    val arr = listOf("Ford", "Mazda", "Kia", 765, true)
-        println(md5("Ford"))
-    println("1083da2df15d6ebfe62186418a76863")
-    val pc = listOf("Dell", "Mac", "Lenovo")
-    val fib = listOf(1, 1, 2, 3, 5, 8, 13)
-    println("PS: ${pc.getFirst}, Fib: ${fib.getFirst}")
+/*
+* Рассматриваем parallestream, pmap и flow.
+* Flow выаполняется постепенно и сразу
+* parallelStream быстрее в 2 раза чем pmap
+* */
 
 
+
+fun main() {
+
+//    val time = measureTimeMillis {
+//        val res = (1..10).toList()
+//            .parallelStream()
+//            .map { getHttpAsync("https://jsonplaceholder.typicode.com/comments/$it") }
+//            .collect(Collectors.toList())
+//
+//        println(res)
+//
+//    }
+//    println("ParallelStream Time: $time")
+//
+    val time2 = measureTimeMillis {
+        runBlocking {
+            val res2 = (1..10).toList()
+                .pmap { RequestHelper().getData("https://jsonplaceholder.typicode.com/comments/$it") }
+
+            println(res2)
+        }
+    }
+    println("PMAP Time: $time2")
+//
+//    val time3 = measureTimeMillis {
+//        runBlocking {
+//            httpFlow()
+//                .collect{ value -> println(value) }
+//        }
+//    }
+//    println("flow $time3")
+//
+//    val time4 = measureTimeMillis {
+//        runBlocking {
+//            val res = withContext(Dispatchers.IO) {
+//                val res = (1..10).toList()
+//                    .map { RequestHelper().getData("https://jsonplaceholder.typicode.com/comments/$it") }
+//            }
+//
+//            println(res)
+//        }
+//    }
+//    println("DIO $time4")
+
+
+    val time5 = measureTimeMillis {
+        runBlocking {
+           asyncHttp(21..30)
+        }
+    }
+    println("AsyncHTTP: $time5")
+
+
+}
+
+suspend fun <T>asyncHttp(range: Iterable<T>) = coroutineScope {
+    range.toList().map { elem ->
+        async(Dispatchers.IO) {
+            RequestHelper().getData("https://jsonplaceholder.typicode.com/comments/$elem")
+        }
+    }.awaitAll()
+}
+
+fun httpFlow() = flow {
+    for (i in 1..10) {
+        emit(
+            RequestHelper().getData("https://jsonplaceholder.typicode.com/comments/$i")
+        )
+    }
+}.flowOn(Dispatchers.Default)
+
+suspend fun <A, B> Iterable<A>.pmap(f: suspend (A) -> B): List<B> = coroutineScope {
+    map { async { f(it) } }.awaitAll()
 }
 
 var color = { red: Int, green: Int, blue: Int ->
@@ -43,12 +118,3 @@ fun <T>Iterable<T>.stringify(): String {
 }
 val <T>List<T>.getFirst: T
     get() = this[0]
-
-
-
-class Gangster(val id: Int, val name: String) {
-    fun getInfo():String {
-        return "ID: $id, Name: $name"
-    }
-}
-class Cage(var gangster: Gangster, val size: Int)

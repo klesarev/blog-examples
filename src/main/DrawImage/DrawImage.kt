@@ -88,10 +88,3 @@ fun drawRandomImage(width: Int, height: Int, redRng: Int = 256, greenRng: Int = 
     }
     writeImage(img,"D:/randImage.bmp")
 }
-
-var randColor = { red: Int, green: Int, blue: Int ->
-    val R = if (red <= 0 || red > 255) 0 else Random.nextInt(0, red)
-    val G = if (green <=0 || green > 255) 0 else Random.nextInt(0, green)
-    val B = if (blue <=0 || blue > 255) 0 else Random.nextInt(0, blue)
-    Color(R,G,B)
-}
