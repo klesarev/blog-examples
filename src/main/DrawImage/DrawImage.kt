@@ -18,19 +18,23 @@ fun main() {
 
     // prints pixel heart
     val map = arrayOf(
-        listOf(0,2,2,0,0,0,0,2,2,0),
-        listOf(2,1,1,2,0,0,2,1,1,2),
-        listOf(2,1,1,1,2,2,1,1,1,2),
-        listOf(2,1,1,1,1,1,1,1,1,2),
-        listOf(2,1,1,1,1,1,1,1,1,2),
-        listOf(2,1,1,1,1,1,1,1,1,2),
-        listOf(0,2,1,1,1,1,1,1,2,0),
-        listOf(0,0,2,1,1,1,1,2,0,0),
-        listOf(0,0,0,2,1,1,2,0,0,0),
-        listOf(0,0,0,0,2,2,0,0,0,0)
+        listOf(0,0,0,0,0,0,0,0,0,0,0,0,0,0,0),
+        listOf(0,0,0,1,1,1,0,0,0,1,2,2,0,0,0),
+        listOf(0,0,1,3,3,1,1,0,1,1,1,2,2,0,0),
+        listOf(0,1,3,3,1,1,1,1,1,1,1,1,2,2,0),
+        listOf(0,1,3,1,1,1,1,1,1,1,1,1,2,2,0),
+        listOf(0,1,1,1,1,1,1,1,1,1,1,1,2,2,0),
+        listOf(0,1,1,1,1,1,1,1,1,1,1,1,2,2,0),
+        listOf(0,0,1,1,1,1,1,1,1,1,1,2,2,0,0),
+        listOf(0,0,0,1,1,1,1,1,1,1,2,2,0,0,0),
+        listOf(0,0,0,0,1,1,1,1,1,2,2,0,0,0,0),
+        listOf(0,0,0,0,0,1,1,1,2,2,0,0,0,0,0),
+        listOf(0,0,0,0,0,0,1,2,2,0,0,0,0,0,0),
+        listOf(0,0,0,0,0,0,0,2,0,0,0,0,0,0,0),
+        listOf(0,0,0,0,0,0,0,0,0,0,0,0,0,0,0),
     )
 
-    val heartImage = BufferedImage(100,100,TYPE_INT_RGB)
+    val heartImage = BufferedImage(150,140,TYPE_INT_RGB)
     drawIcon(map,heartImage)
     writeImage(heartImage,"D:/heart.bmp")
 
@@ -44,21 +48,24 @@ fun drawIcon(pixels: Array<List<Int>>, image: BufferedImage) {
     pixels.forEachIndexed { posY, rowElement ->
         rowElement.forEachIndexed { posX, colElement ->
             when(colElement) {
-                1 -> drawTile(posX*10,posY*10,10,255,2,0,image)
-                2 -> drawTile(posX*10,posY*10,10,0,0,0,image)
-                else -> drawTile(posX*10,posY*10,10,255,255,255,image)
+                1 -> drawTile(posX*10,posY*10,10,255,2,0, image) // red
+                2 -> drawTile(posX*10,posY*10,10,156,25,31, image) // dark red
+                3 -> drawTile(posX*10,posY*10,10,255,255,255, image) // violet
+                else -> drawTile(posX*10,posY*10,10,23,0,44, image) // white
             }
         }
     }
 }
 
 fun writeImage(img: BufferedImage, file: String) {
-    try {
-        Thread(Runnable {
+    val imagethread = Thread(Runnable {
             ImageIO.write(img, File(file).extension, File(file))
-        }).start()
+        })
+    try {
+        imagethread.start()
     } catch (ex: Exception) {
         ex.printStackTrace()
+        imagethread.interrupt()
     }
 }
 
