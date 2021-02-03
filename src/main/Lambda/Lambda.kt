@@ -7,6 +7,8 @@ import kotlinx.coroutines.flow.*
 import java.awt.Color
 import java.math.BigInteger
 import java.security.MessageDigest
+import java.util.concurrent.CompletableFuture
+import java.util.function.Supplier
 import java.util.stream.Collectors
 import kotlin.random.Random
 import kotlin.system.measureTimeMillis
@@ -20,18 +22,18 @@ import kotlin.system.measureTimeMillis
 
 
 
-fun main() {
+suspend fun main() {
 
-    val time = measureTimeMillis {
-        val res = (10 downTo 0).toList()
-            .parallelStream()
-            .map { getHttpAsync("https://jsonplaceholder.typicode.com/comments/$it") }
-            .collect(Collectors.toList())
-
-        println(res)
-
-    }
-    println("ParallelStream Time: $time")
+//    val time = measureTimeMillis {
+//        val res = (10 downTo 0).toList()
+//            .parallelStream()
+//            .map { getHttpAsync("https://jsonplaceholder.typicode.com/comments/$it") }
+//            .collect(Collectors.toList())
+//
+//        println(res)
+//
+//    }
+//    println("ParallelStream Time: $time")
 //
 //    val time2 = measureTimeMillis {
 //        runBlocking {
@@ -65,14 +67,28 @@ fun main() {
 //    println("DIO $time4")
 
 
-    val time5 = measureTimeMillis {
-        runBlocking {
-           println(asyncHttp(10 downTo 0))
-        }
+//    val time5 = measureTimeMillis {
+//        runBlocking {
+//           println(asyncHttp(10 downTo 0))
+//        }
+//    }
+//    println("AsyncHTTP: $time5")
+
+    GlobalScope.launch { // launch a new coroutine and keep a reference to its Job
+        delay(1000L)
+        println(loadComment(1))
     }
-    println("AsyncHTTP: $time5")
+
+}
+
+suspend fun loadComment(id: Int): String? =
+    withContext(Dispatchers.Default) {
+        getHttpAsync("https://jsonplaceholder.typicode.com/comments/$id")
+    }
 
 
+inline fun load(link: String, callback: (String?) -> Unit) {
+    callback(RequestHelper().getData(link))
 }
 
 suspend fun <T>asyncHttp(range: Iterable<T>) = coroutineScope {

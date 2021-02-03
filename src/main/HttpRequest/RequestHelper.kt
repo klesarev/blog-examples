@@ -1,5 +1,6 @@
 package HttpRequest
 
+import HttpRequestAsync.getHttpAsync
 import kotlinx.coroutines.*
 import java.net.HttpURLConnection
 import java.net.URL
@@ -17,7 +18,6 @@ import kotlin.coroutines.suspendCoroutine
 
 fun main() {
     println(
-        //RequestHelper().getData("https://jsonplaceholder.typicode.com/todos/1")
         RequestHelper().getData("http://127.0.0.1:8080/api?language=Kotlin&level=middle&port=8080")
     )
 }
@@ -36,7 +36,7 @@ class RequestHelper {
             try {
                 text = inputStream.bufferedReader().readText()
             } catch (ex: Exception) {
-                ex.printStackTrace()
+                text = """{"result" : "Can't get data from url", "url" : "${url}", "message" : "${ex.localizedMessage}"}"""
             } finally {
                 disconnect()
             }
