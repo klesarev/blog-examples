@@ -7,11 +7,16 @@ import kotlinx.coroutines.flow.*
 import java.awt.Color
 import java.math.BigInteger
 import java.security.MessageDigest
+import java.util.concurrent.Callable
 import java.util.concurrent.CompletableFuture
 import java.util.function.Supplier
 import java.util.stream.Collectors
 import kotlin.random.Random
 import kotlin.system.measureTimeMillis
+import java.util.concurrent.ForkJoinPool
+import java.util.concurrent.ExecutionException
+
+import java.util.stream.IntStream
 
 
 /*
@@ -21,20 +26,8 @@ import kotlin.system.measureTimeMillis
 * */
 
 
+fun main() {
 
-suspend fun main() {
-
-//    val time = measureTimeMillis {
-//        val res = (10 downTo 0).toList()
-//            .parallelStream()
-//            .map { getHttpAsync("https://jsonplaceholder.typicode.com/comments/$it") }
-//            .collect(Collectors.toList())
-//
-//        println(res)
-//
-//    }
-//    println("ParallelStream Time: $time")
-//
 //    val time2 = measureTimeMillis {
 //        runBlocking {
 //            val res2 = (1..10).toList()
@@ -43,7 +36,6 @@ suspend fun main() {
 //            //println(res2)
 //        }
 //    }
-//    println("PMAP Time: $time2")
 //
 //    val time3 = measureTimeMillis {
 //        runBlocking {
@@ -52,7 +44,6 @@ suspend fun main() {
 //                .collect{ value -> println(value) }
 //        }
 //    }
-//    println("flow $time3")
 //
 //    val time4 = measureTimeMillis {
 //        runBlocking {
@@ -64,19 +55,31 @@ suspend fun main() {
 //            println(res)
 //        }
 //    }
-//    println("DIO $time4")
-
-
+//
 //    val time5 = measureTimeMillis {
 //        runBlocking {
-//           println(asyncHttp(10 downTo 0))
+//           println(asyncHttp(20 downTo 10))
 //        }
 //    }
-//    println("AsyncHTTP: $time5")
+//
+//    val time6 = measureTimeMillis {
+//        runBlocking {
+//            val res2 = (20 downTo 10)
+//                .parallelMap {
+//                    RequestHelper().getData("https://jsonplaceholder.typicode.com/comments/$it")
+//                }
+//        }
+//    }
 
-    GlobalScope.launch { // launch a new coroutine and keep a reference to its Job
-        delay(1000L)
-        println(loadComment(1))
+    val fibonacci = sequence<Int> {
+        var cur = 1
+        var next = 1
+        while (true) {
+            yield(cur) // суспенд, ждет когда попросят выолнения
+            val tmp = cur + next
+            cur = next
+            next = tmp
+        }
     }
 
 }
@@ -87,7 +90,7 @@ suspend fun loadComment(id: Int): String? =
     }
 
 
-inline fun load(link: String, callback: (String?) -> Unit) {
+inline fun loadCallback(link: String, callback: (String?) -> Unit) {
     callback(RequestHelper().getData(link))
 }
 
@@ -99,30 +102,26 @@ suspend fun <T>asyncHttp(range: Iterable<T>) = coroutineScope {
     }.awaitAll()
 }
 
+// мой вариант параллельной мапы
+suspend fun <T, V> Iterable<T>.parallelMap(func: suspend (T) -> V): Iterable<V> = coroutineScope {
+    map { element ->
+        async(Dispatchers.IO) { func(element) }
+    }.awaitAll()
+}
+
+
 fun httpFlow() = flow {
     for (i in 1..10) {
         emit(RequestHelper().getData("https://jsonplaceholder.typicode.com/comments/$i"))
     }
 }.flowOn(Dispatchers.Default)
 
+
+// медленная из-за отсутствия dispatchers.io
 suspend fun <A, B> Iterable<A>.pmap(f: suspend (A) -> B): List<B> = coroutineScope {
     map { async { f(it) } }.awaitAll()
 }
 
-var color = { red: Int, green: Int, blue: Int ->
-    val R = if (red <= 0 || red > 255) 0 else Random.nextInt(0, red)
-    val G = if (green <=0 || green > 255) 0 else Random.nextInt(0, green)
-    val B = if (blue <=0 || blue > 255) 0 else Random.nextInt(0, blue)
-    Color(R,G,B)
-}
-
-var md5 = { input: String ->
-    val md = MessageDigest.getInstance("MD5")
-
-    BigInteger(1, md.digest(input.toByteArray()))
-        .toString(16)
-        .padStart(32, '0')
-}
 
 var miletokm = { miles: Int ->
     miles * 1.60934

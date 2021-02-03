@@ -2,7 +2,7 @@ package Password
 
 
 fun main() {
-    println(passGen(54))
+    println(passGen(10))
 }
 
 fun passGen(symbols: Int): String {

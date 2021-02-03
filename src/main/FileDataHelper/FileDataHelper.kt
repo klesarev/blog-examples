@@ -1,8 +1,8 @@
 package FileDataHelper
 
 import kotlinx.coroutines.*
-import java.io.BufferedReader
-import java.io.IOException
+import java.io.*
+import java.lang.Exception
 import java.lang.Runnable
 import java.nio.file.Files
 import java.nio.file.Paths
@@ -11,8 +11,13 @@ import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 import kotlin.coroutines.suspendCoroutine
 
-suspend fun main() {
-    FileDataHelper().writeContent("D:/tt.txt","From dispatchers")
+fun main() {
+    runBlocking {
+        GlobalScope.launch {
+           val txt =  FileDataHelper().getContentAsync("D:/async.txt").bufferedReader().readText()
+            println(txt)
+        }.join()
+    }
 }
 
 class FileDataHelper {
@@ -33,8 +38,7 @@ class FileDataHelper {
         }
     }
 
-   suspend fun writeContent(source: String, content: String) = coroutineScope {
-       Thread (Runnable{
+    fun writeContent(source: String, content: String) {
            try {
                Files.write(Paths.get(source), content.toByteArray(),
                    StandardOpenOption.APPEND,
@@ -43,7 +47,27 @@ class FileDataHelper {
            } catch (error: IOException) {
                error.printStackTrace()
            }
-       }).start()
-   }
+    }
+
+    suspend fun writeContentAsync(file: String, data: ByteArray, add: Boolean = true) = coroutineScope {
+        val dataStr = async(Dispatchers.IO) {
+            FileOutputStream(file, add).write(data)
+        }
+        try {
+            dataStr.await()
+        } catch (ex: Exception) {
+            ex.printStackTrace()
+            throw Exception("Error: ${ex.message}")
+        }
+    }
+
+    suspend fun getContentAsync(source: String): InputStream = coroutineScope {
+        val dataStr = async(Dispatchers.IO) { FileInputStream(source) }
+        try {
+            dataStr.await()
+        } catch (ex: Exception) {
+            throw Exception("Error: ${ex.message}")
+        }
+    }
 
 }
