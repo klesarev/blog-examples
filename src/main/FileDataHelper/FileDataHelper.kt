@@ -13,13 +13,7 @@ import kotlin.coroutines.resumeWithException
 import kotlin.coroutines.suspendCoroutine
 
 fun main() {
-    runBlocking {
-        GlobalScope.launch {
-            FileDataHelper().writeContentAsync("D:/async.txt","Lorem sit dolor amet".toByteArray())
-            val txt =  FileDataHelper().getContentAsync("D:/async.txt").bufferedReader().readText()
-            println(txt)
-        }.join()
-    }
+
 }
 
 class FileDataHelper {
