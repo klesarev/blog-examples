@@ -37,7 +37,7 @@ import java.nio.file.StandardOpenOption
 fun main() {
 
     // prints pixel heart
-    val map = arrayOf(
+    val map = arrayListOf(
         listOf(0,0,0,0,0,0,0,0,0,0,0,0,0,0,0),
         listOf(0,0,0,1,1,1,0,0,0,1,2,2,0,0,0),
         listOf(0,0,1,3,3,1,1,0,1,1,1,2,2,0,0),
@@ -56,23 +56,27 @@ fun main() {
 
     val arrl = arrayListOf<List<String>>()
     //writePixelColors("D:/pix.xlsx", "D:/pix.txt", "editor")
+
+    val img = BufferedImage(150,140, TYPE_INT_RGB)
+
     runBlocking {
-        matrix2D("D:/pix.txt","#")
-            .map { line->
-                println(line.map { toRGB(it) })
-            }
+        val result = matrix2D("D:/pix.txt","#")
+        drawIcon(result,img)
+        writeImage(img,"D:/test_matrix.bmp")
     }
 
 }
 
-suspend fun matrix2D(file: String, delimiter: String): ArrayList<List<String>> {
-    val list = arrayListOf<List<String>>()
+suspend fun matrix2D(file: String, delimiter: String): ArrayList<List<Int>> {
+    val list = arrayListOf<List<Int>>()
 
     FileDataHelper().getContentAsync(file).use { matrix ->
         matrix.bufferedReader().lines().forEach { row ->
             list.add(
                 row.split(delimiter)
+                    .map { it }
                     .filter { it != "" }
+                    .map { it.toInt() }
             )
         }
     }
@@ -114,7 +118,7 @@ fun writePixelColors(input: String, output: String, listName: String) {
     }
 }
 
-fun drawIcon(pixels: Array<List<Int>>, image: BufferedImage) {
+fun drawIcon(pixels: ArrayList<List<Int>>, image: BufferedImage) {
     pixels.forEachIndexed { posY, row ->
         row.forEachIndexed { posX, col ->
             when(col) {
