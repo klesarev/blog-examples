@@ -1,21 +1,14 @@
 package Generics
 
+import FileDataHelper.FileDataHelper
 import HttpRequest.RequestHelper
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.async
-import kotlinx.coroutines.awaitAll
-import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.*
 
 
 fun main() {
 
-    val res = callback(listOf<Int>(1,2,3)) { elem ->
-        elem.map { it * 2 }
-    }
-    println(res)
 
 }
-
 
 fun<T,V> callback(data: T, callback: (T) -> V?): V? {
     return callback(data)

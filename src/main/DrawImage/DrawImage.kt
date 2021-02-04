@@ -54,9 +54,29 @@ fun main() {
         listOf(0,0,0,0,0,0,0,0,0,0,0,0,0,0,0),
     )
 
+    val arrl = arrayListOf<List<String>>()
+    //writePixelColors("D:/pix.xlsx", "D:/pix.txt", "editor")
+    runBlocking {
+        matrix2D("D:/pix.txt","#")
+            .map { line->
+                println(line.map { toRGB(it) })
+            }
+    }
 
-    writePixelColors("D:/pix.xlsx", "D:/pix.txt", "editor")
+}
 
+suspend fun matrix2D(file: String, delimiter: String): ArrayList<List<String>> {
+    val list = arrayListOf<List<String>>()
+
+    FileDataHelper().getContentAsync(file).use { matrix ->
+        matrix.bufferedReader().lines().forEach { row ->
+            list.add(
+                row.split(delimiter)
+                    .filter { it != "" }
+            )
+        }
+    }
+    return list
 }
 
 fun createPixelArray(file: String) {
@@ -88,7 +108,7 @@ fun writePixelColors(input: String, output: String, listName: String) {
                     is HSSFColor ->
                         FileDataHelper().writeContent(output,"#${color.hexString.substring(2,8)}")
                 }
-            } else FileDataHelper().writeContent(output, "# ERROR: Colors not found")
+            } //else FileDataHelper().writeContent(output, "# ERROR: Colors not found")
 
         }
     }
