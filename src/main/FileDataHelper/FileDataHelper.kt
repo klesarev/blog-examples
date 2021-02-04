@@ -1,6 +1,7 @@
 package FileDataHelper
 
 import kotlinx.coroutines.*
+import org.apache.commons.compress.utils.IOUtils.toByteArray
 import java.io.*
 import java.lang.Exception
 import java.lang.Runnable
@@ -14,7 +15,8 @@ import kotlin.coroutines.suspendCoroutine
 fun main() {
     runBlocking {
         GlobalScope.launch {
-           val txt =  FileDataHelper().getContentAsync("D:/async.txt").bufferedReader().readText()
+            FileDataHelper().writeContentAsync("D:/async.txt","Lorem sit dolor amet".toByteArray())
+            val txt =  FileDataHelper().getContentAsync("D:/async.txt").bufferedReader().readText()
             println(txt)
         }.join()
     }
@@ -49,20 +51,21 @@ class FileDataHelper {
            }
     }
 
-    suspend fun writeContentAsync(file: String, data: ByteArray, add: Boolean = true) = coroutineScope {
+    suspend fun writeContentAsync(file: String, data: ByteArray, add: Boolean = false) = coroutineScope {
         val dataStr = async(Dispatchers.IO) {
             FileOutputStream(file, add).write(data)
         }
         try {
             dataStr.await()
         } catch (ex: Exception) {
-            ex.printStackTrace()
             throw Exception("Error: ${ex.message}")
         }
     }
 
-    suspend fun getContentAsync(source: String): InputStream = coroutineScope {
-        val dataStr = async(Dispatchers.IO) { FileInputStream(source) }
+    suspend fun getContentAsync(file: String): InputStream = coroutineScope {
+        val dataStr = async(Dispatchers.IO) {
+            FileInputStream(file)
+        }
         try {
             dataStr.await()
         } catch (ex: Exception) {
