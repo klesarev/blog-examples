@@ -6,8 +6,7 @@ import kotlinx.coroutines.*
 
 
 fun main() {
-    val lst = listOf(1,2,2.7,3.6)
-    println(lst.summ)
+
 
 }
 

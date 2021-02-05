@@ -25,6 +25,19 @@ import org.apache.poi.hssf.util.HSSFColor
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.StandardOpenOption
+import org.apache.poi.xssf.usermodel.XSSFCell
+
+import org.apache.poi.xssf.usermodel.XSSFRow
+
+import org.apache.poi.xssf.usermodel.XSSFSheet
+import org.bouncycastle.asn1.x500.style.RFC4519Style
+import org.bouncycastle.asn1.x500.style.RFC4519Style.cn
+
+
+
+
+
+
 
 
 /*
@@ -55,15 +68,11 @@ fun main() {
     )
 
     val arrl = arrayListOf<List<String>>()
-    //writePixelColors("D:/pix.xlsx", "D:/pix.txt", "editor")
+    writePixelColors("D:/pix.xlsx",  "editor")
 
     val img = BufferedImage(150,140, TYPE_INT_RGB)
 
-    runBlocking {
-        val result = matrix2D("D:/pix.txt","#")
-        drawIcon(result,img)
-        writeImage(img,"D:/convolve.bmp")
-    }
+
 
 }
 
@@ -83,6 +92,11 @@ suspend fun matrix2D(file: String, delimiter: String): ArrayList<List<Int>> {
     return list
 }
 
+fun render(w: Int, h: Int) {
+
+
+}
+
 fun createPixelArray(file: String) {
     // create 2D array from file
 }
@@ -91,32 +105,47 @@ fun drawIconFromText() {
     // load map of pixels from txt file
 }
 
-// Need refactor
-// load data from xlsx and write to txt
-// rewrite to async operation read data sheet
-fun writePixelColors(input: String, output: String, listName: String) {
+
+fun writePixelColors(input: String, listName: String) {
     val table = FileInputStream(input)
     val sheet = WorkbookFactory
                     .create(table)
                     .getSheet(listName)
+
+    val cellList = arrayListOf<Color>()
+    val rows = sheet.physicalNumberOfRows;
+    val cells = sheet.getRow(5).physicalNumberOfCells
+
+    val pixArray = Array(rows) {Array(cells) {""} }
+
 
     for (row: Row in sheet) {
         for (cell: Cell in row) {
             val cellStyle = cell.cellStyle
             val color = cellStyle.fillForegroundColorColor
 
-            if (color != null) {
-                when(color) {
-                    is XSSFColor ->
-                        FileDataHelper().writeContent(output, "#${color.argbHex.substring(2,8)}")
-                    is HSSFColor ->
-                        FileDataHelper().writeContent(output,"#${color.hexString.substring(2,8)}")
-                }
-            } //else FileDataHelper().writeContent(output, "# ERROR: Colors not found")
+            if (color != null && color is XSSFColor) {
+                pixArray[cell.rowIndex][cell.columnIndex] = color.argbHex.substring(2,8)
+            }
 
         }
+
     }
+
+    val final = arrayListOf<List<String>>()
+
+    pixArray
+        .forEach { rowX ->
+            val rr = rowX.filter { it != "" }
+            if (rr.isNotEmpty()) {
+                final.add(rr)
+            }
+        }
+
+    print(final)
 }
+
+
 
 fun drawIcon(pixels: ArrayList<List<Int>>, image: BufferedImage) {
     pixels.forEachIndexed { posY, row ->

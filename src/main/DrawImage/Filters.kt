@@ -22,7 +22,8 @@ fun BufferedImage.desaturate(): BufferedImage {
 //            val green = rgb shr 8 and 0xFF
 //            val blue = rgb and 0xFF
 //
-//            drawPixel(X,Y,redLvl,green,blue,this)
+//            drawPixel(X,Y,red+redLvl,green,blue,this)
+//
 //        }
 //    }
 //}
