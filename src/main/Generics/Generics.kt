@@ -6,9 +6,17 @@ import kotlinx.coroutines.*
 
 
 fun main() {
-
+    val lst = listOf(1,2,2.7,3.6)
+    println(lst.summ)
 
 }
+
+val <T:Number> List<T>.summ: Int
+    get() {
+        var tmp = 0
+        this.map { tmp += it.toInt() }
+        return tmp
+    }
 
 fun<T,V> callback(data: T, callback: (T) -> V?): V? {
     return callback(data)

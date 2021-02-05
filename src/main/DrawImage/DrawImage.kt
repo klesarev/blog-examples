@@ -62,7 +62,7 @@ fun main() {
     runBlocking {
         val result = matrix2D("D:/pix.txt","#")
         drawIcon(result,img)
-        writeImage(img,"D:/test_matrix.bmp")
+        writeImage(img,"D:/convolve.bmp")
     }
 
 }
