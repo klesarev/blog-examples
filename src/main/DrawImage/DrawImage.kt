@@ -1,9 +1,6 @@
 package DrawImage
 
 import FileDataHelper.FileDataHelper
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 import org.apache.poi.ss.usermodel.*
 import java.awt.Color
 import java.awt.image.BufferedImage
@@ -15,29 +12,11 @@ import java.io.File
 import java.lang.Exception
 import java.io.FileInputStream
 
-import java.io.InputStream
 import org.apache.poi.ss.usermodel.WorkbookFactory
 
-import org.apache.poi.ss.usermodel.Workbook
 import org.apache.poi.ss.usermodel.Cell
 import org.apache.poi.xssf.usermodel.XSSFColor
-import org.apache.poi.hssf.util.HSSFColor
-import java.nio.file.Files
-import java.nio.file.Path
-import java.nio.file.StandardOpenOption
-import org.apache.poi.xssf.usermodel.XSSFCell
-
 import org.apache.poi.xssf.usermodel.XSSFRow
-
-import org.apache.poi.xssf.usermodel.XSSFSheet
-import org.bouncycastle.asn1.x500.style.RFC4519Style
-import org.bouncycastle.asn1.x500.style.RFC4519Style.cn
-
-
-
-
-
-
 
 
 /*
@@ -68,11 +47,13 @@ fun main() {
     )
 
     val arrl = arrayListOf<List<String>>()
-    writePixelColors("D:/pix.xlsx",  "editor")
 
     val img = BufferedImage(150,140, TYPE_INT_RGB)
 
-
+    writePixelColors("D:/pix.xlsx","editor").forEach {
+        print(it)
+    }
+    render(writePixelColors("D:/pix.xlsx","editor"))
 
 }
 
@@ -92,9 +73,16 @@ suspend fun matrix2D(file: String, delimiter: String): ArrayList<List<Int>> {
     return list
 }
 
-fun render(w: Int, h: Int) {
+fun render(pixels: ArrayList<List<String>>) {
+    val img = BufferedImage(90,80, TYPE_INT_RGB)
 
-
+    pixels.forEachIndexed { posY, row ->
+        row.forEachIndexed { posX, col ->
+            println("${(posX+1)*10} $$$$ ${(posY+1)*10}")
+            drawTile((posX+1)*10,(posY+1)*10, 10,toRGB(col).red,toRGB(col).green,toRGB(col).blue, img)
+        }
+    }
+    writeImage(img,"D:/final.bmp")
 }
 
 fun createPixelArray(file: String) {
@@ -106,31 +94,50 @@ fun drawIconFromText() {
 }
 
 
-fun writePixelColors(input: String, listName: String) {
+fun writePixelColors(input: String, listName: String): ArrayList<List<String>> {
     val table = FileInputStream(input)
     val sheet = WorkbookFactory
                     .create(table)
                     .getSheet(listName)
 
-    val cellList = arrayListOf<Color>()
-    val rows = sheet.physicalNumberOfRows;
-    val cells = sheet.getRow(5).physicalNumberOfCells
+    val rows = sheet.lastRowNum
+    val cells = sheet.getRow(rows).physicalNumberOfCells
 
-    val pixArray = Array(rows) {Array(cells) {""} }
+    val cell2 = sheet.getRow(rows).lastCellNum
 
+    val mutmap = mutableMapOf<Int,Int>()
 
-    for (row: Row in sheet) {
-        for (cell: Cell in row) {
-            val cellStyle = cell.cellStyle
+    println("Rows: $rows == Cells: ${sheet.getRow(rows).lastCellNum-1}")
+
+    val pixArray = Array(100) {Array(100) {""} }
+
+    for (i: Row in sheet) {
+        for (j: Cell in i) {
+            val cellStyle = j.cellStyle
             val color = cellStyle.fillForegroundColorColor
-
             if (color != null && color is XSSFColor) {
-                pixArray[cell.rowIndex][cell.columnIndex] = color.argbHex.substring(2,8)
+                println(
+                    //"${j.address.row} % ${j.address.column}"
+                    "${i.rowNum} % ${j.columnIndex}"
+                )
+                pixArray[i.rowNum][j.columnIndex] = color.argbHex.substring(2,8)
             }
 
         }
-
     }
+
+
+//    for (row: Row in sheet) {
+//        for (cell: Cell in row) {
+//            val cellStyle = cell.cellStyle
+//            val color = cellStyle.fillForegroundColorColor
+//
+//            if (color != null && color is XSSFColor) {
+//                println("${cell.rowIndex} == ${cell.address.column}")
+//                pixArray[cell.rowIndex][(cell.address.row)] = color.argbHex.substring(2,8)
+//            }
+//        }
+//    }
 
     val final = arrayListOf<List<String>>()
 
@@ -142,7 +149,7 @@ fun writePixelColors(input: String, listName: String) {
             }
         }
 
-    print(final)
+    return final
 }
 
 
