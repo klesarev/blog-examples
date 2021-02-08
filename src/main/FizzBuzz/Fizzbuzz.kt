@@ -11,7 +11,9 @@ fun main() {
     fizzBuzz()
 
     // решение через when
-    fizzBuzzWhen()
+    (1..100).map {
+        println( fizzBuzzWhen(it))
+    }
 
     // решение через потоки - Java IntStream
     fizzBuzzJava()
@@ -34,25 +36,13 @@ fun fizzBuzz() {
     }
 }
 
-fun fizzBuzzWhen() {
-    for (it in 1..100) {
-        when {
-            it % 15 == 0 -> {
-                println("Fizz Buzz = $it")
-                continue
-            }
-            it % 5 == 0 -> {
-                println("Buzz = $it")
-                continue
-            }
-            it % 3 == 0 -> {
-                println("Fizz = $it")
-                continue
-            }
-            else -> println("$it")
-        }
+fun fizzBuzzWhen(n: Int) =
+    when {
+        n % 15 == 0 -> "FizzBuzz"
+        n % 5 == 0 -> "Buzz"
+        n % 3 ==0 -> "Fizz"
+        else -> n
     }
-}
 
 fun fizzBuzzJava() = IntStream.rangeClosed(1, 100)
     .mapToObj { n: Int -> if (n % 3 == 0)

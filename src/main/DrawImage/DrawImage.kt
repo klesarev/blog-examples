@@ -46,14 +46,14 @@ fun main() {
         listOf(0,0,0,0,0,0,0,0,0,0,0,0,0,0,0),
     )
 
-    val arrl = arrayListOf<List<String>>()
+        //renderImage(getPixelColors("D:/pix.xlsx","editor"))
+    val imageRand = BufferedImage(380,380, TYPE_INT_RGB)
 
-    val img = BufferedImage(150,140, TYPE_INT_RGB)
 
-    writePixelColors("D:/pix.xlsx","editor").forEach {
-        print(it)
-    }
-    render(writePixelColors("D:/pix.xlsx","editor"))
+
+    drawRandImage(imageRand,2,180,20,230)
+    imageRand.desaturate()
+    writeImage(imageRand,"D:/imageRand4.bmp")
 
 }
 
@@ -73,71 +73,41 @@ suspend fun matrix2D(file: String, delimiter: String): ArrayList<List<Int>> {
     return list
 }
 
-fun render(pixels: ArrayList<List<String>>) {
-    val img = BufferedImage(90,80, TYPE_INT_RGB)
+fun renderImage(pixels: ArrayList<List<String>>) {
+    val img = BufferedImage(100,100, TYPE_INT_RGB)
 
     pixels.forEachIndexed { posY, row ->
         row.forEachIndexed { posX, col ->
-            println("${(posX+1)*10} $$$$ ${(posY+1)*10}")
+            println("CoordX: ${(posX+1)*10} : CoordY: ${(posY+1)*10}")
             drawTile((posX+1)*10,(posY+1)*10, 10,toRGB(col).red,toRGB(col).green,toRGB(col).blue, img)
         }
     }
     writeImage(img,"D:/final.bmp")
 }
 
-fun createPixelArray(file: String) {
-    // create 2D array from file
-}
-
-fun drawIconFromText() {
-    // load map of pixels from txt file
-}
-
-
-fun writePixelColors(input: String, listName: String): ArrayList<List<String>> {
+fun getPixelColors(input: String, listName: String): ArrayList<List<String>> {
     val table = FileInputStream(input)
     val sheet = WorkbookFactory
                     .create(table)
                     .getSheet(listName)
 
     val rows = sheet.lastRowNum
-    val cells = sheet.getRow(rows).physicalNumberOfCells
+    val cell2 = sheet.getRow(rows).lastCellNum+rows
 
-    val cell2 = sheet.getRow(rows).lastCellNum
+    println("Rows: $rows == Cells: $cell2")
 
-    val mutmap = mutableMapOf<Int,Int>()
-
-    println("Rows: $rows == Cells: ${sheet.getRow(rows).lastCellNum-1}")
-
-    val pixArray = Array(100) {Array(100) {""} }
+    val pixArray:Array<Array<String>> = Array(rows+1) {Array(cell2) {""} } // переделать размеры массива
 
     for (i: Row in sheet) {
         for (j: Cell in i) {
             val cellStyle = j.cellStyle
             val color = cellStyle.fillForegroundColorColor
             if (color != null && color is XSSFColor) {
-                println(
-                    //"${j.address.row} % ${j.address.column}"
-                    "${i.rowNum} % ${j.columnIndex}"
-                )
+                //println("${i.rowNum} % ${j.columnIndex}")
                 pixArray[i.rowNum][j.columnIndex] = color.argbHex.substring(2,8)
             }
-
         }
     }
-
-
-//    for (row: Row in sheet) {
-//        for (cell: Cell in row) {
-//            val cellStyle = cell.cellStyle
-//            val color = cellStyle.fillForegroundColorColor
-//
-//            if (color != null && color is XSSFColor) {
-//                println("${cell.rowIndex} == ${cell.address.column}")
-//                pixArray[cell.rowIndex][(cell.address.row)] = color.argbHex.substring(2,8)
-//            }
-//        }
-//    }
 
     val final = arrayListOf<List<String>>()
 
@@ -147,14 +117,15 @@ fun writePixelColors(input: String, listName: String): ArrayList<List<String>> {
             if (rr.isNotEmpty()) {
                 final.add(rr)
             }
+
+            print(rr)
         }
 
     return final
 }
 
 
-
-fun drawIcon(pixels: ArrayList<List<Int>>, image: BufferedImage) {
+fun drawImage(pixels: ArrayList<List<Int>>, image: BufferedImage) {
     pixels.forEachIndexed { posY, row ->
         row.forEachIndexed { posX, col ->
             when(col) {
@@ -191,7 +162,7 @@ fun drawPixel(x:Int, y:Int, red:Int, green:Int, blue: Int, image: BufferedImage)
     image.setRGB(x, y, Color(red,green,blue).rgb)
 }
 
-fun drawRandImage(image: BufferedImage, stepSize: Int = 0, redRng: Int = 255, greenRng: Int = 255, blueRng: Int = 255) {
+fun drawRandImage(image: BufferedImage, stepSize: Int = 1, redRng: Int = 255, greenRng: Int = 255, blueRng: Int = 255) {
     for(posX in 0 until image.width step stepSize){
         for (posY in 0 until image.height step stepSize) {
             val r = if (redRng <=0) 0 else Random.nextInt(0, redRng)
