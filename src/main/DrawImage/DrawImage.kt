@@ -55,6 +55,8 @@ fun main() {
     imageRand.desaturate()
     writeImage(imageRand,"D:/imageRand4.bmp")
 
+    println(toRGB("dd7c2b"))
+
 }
 
 suspend fun matrix2D(file: String, delimiter: String): ArrayList<List<Int>> {

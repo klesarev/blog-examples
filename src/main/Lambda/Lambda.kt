@@ -26,16 +26,26 @@ import java.util.stream.IntStream
 * */
 
 
+
+const val URL = "https://jsonplaceholder.typicode.com/comments"
+
 fun main() {
 
-//    val time2 = measureTimeMillis {
+    val asyncTime = measureTimeMillis {
+        val result = (1..10).toList()
+            .map {
+                getHttpAsync("$URL/$it")
+            }
+        result.forEach { println(it) }
+    }
+    println("Асинхронный запрос время $asyncTime мс")
+
+//    val parallelHttpTime = measureTimeMillis {
 //        runBlocking {
-//            val res2 = (1..10).toList()
-//                .pmap { RequestHelper().getData("https://jsonplaceholder.typicode.com/comments/$it") }
-//
-//            //println(res2)
+//            println(parallelHttp(1..10))
 //        }
 //    }
+//    println("ParallelHttp: $parallelHttpTime ms")
 //
 //    val time3 = measureTimeMillis {
 //        runBlocking {
@@ -44,6 +54,8 @@ fun main() {
 //                .collect{ value -> println(value) }
 //        }
 //    }
+//
+//    println("ParallelHttp: $time3 ms")
 //
 //    val time4 = measureTimeMillis {
 //        runBlocking {
@@ -84,17 +96,17 @@ fun main() {
 
 }
 
-suspend fun loadComment(id: Int): String? =
-    withContext(Dispatchers.Default) {
-        getHttpAsync("https://jsonplaceholder.typicode.com/comments/$id")
-    }
+//suspend fun loadComment(id: Int): String? =
+//    withContext(Dispatchers.Default) {
+//        getHttpAsync("https://jsonplaceholder.typicode.com/comments/$id")
+//    }
 
 
 inline fun loadCallback(link: String, callback: (String?) -> Unit) {
     callback(RequestHelper().getData(link))
 }
 
-suspend fun <T>asyncHttp(range: Iterable<T>) = coroutineScope {
+suspend fun <T>parallelHttp(range: Iterable<T>) = coroutineScope {
     range.map { elem ->
         async(Dispatchers.IO) {
             getHttpAsync("https://jsonplaceholder.typicode.com/comments/$elem")
@@ -110,11 +122,11 @@ suspend fun <T, V> Iterable<T>.parallelMap(func: suspend (T) -> V): Iterable<V> 
 }
 
 
-fun httpFlow() = flow {
+fun httpFlow(): Flow<String> = flow {
     for (i in 1..10) {
         emit(RequestHelper().getData("https://jsonplaceholder.typicode.com/comments/$i"))
     }
-}.flowOn(Dispatchers.Default)
+}.flowOn(Dispatchers.IO)
 
 
 // медленная из-за отсутствия dispatchers.io
