@@ -17,6 +17,11 @@ import org.apache.poi.ss.usermodel.WorkbookFactory
 import org.apache.poi.ss.usermodel.Cell
 import org.apache.poi.xssf.usermodel.XSSFColor
 import org.apache.poi.xssf.usermodel.XSSFRow
+import java.util.ArrayList
+import java.io.PrintWriter
+
+import org.apache.poi.xssf.usermodel.XSSFSheet
+import java.awt.image.BufferedImage.TYPE_INT_ARGB
 
 
 /*
@@ -24,38 +29,42 @@ import org.apache.poi.xssf.usermodel.XSSFRow
 * But color.getRed() (Blue, Green) can return a value up to 255. So you can get the following
 *  // implementation 'org.apache.poi:poi:5.0.0'
 *  // implementation 'org.apache.poi:poi-ooxml:5.0.0'
+*
+* Get last cell index for create array
+* https://stackoverflow.com/questions/29386722/apache-poi-find-last-cell-in-row?newreg=e8fb8f5b0b2f4015a7718aa08db36ab7
 */
 
 fun main() {
 
-    // prints pixel heart
-    val map = arrayListOf(
-        listOf(0,0,0,0,0,0,0,0,0,0,0,0,0,0,0),
-        listOf(0,0,0,1,1,1,0,0,0,1,2,2,0,0,0),
-        listOf(0,0,1,3,3,1,1,0,1,1,1,2,2,0,0),
-        listOf(0,1,3,3,1,1,1,1,1,1,1,1,2,2,0),
-        listOf(0,1,3,1,1,1,1,1,1,1,1,1,2,2,0),
-        listOf(0,1,1,1,1,1,1,1,1,1,1,1,2,2,0),
-        listOf(0,1,1,1,1,1,1,1,1,1,1,1,2,2,0),
-        listOf(0,0,1,1,1,1,1,1,1,1,1,2,2,0,0),
-        listOf(0,0,0,1,1,1,1,1,1,1,2,2,0,0,0),
-        listOf(0,0,0,0,1,1,1,1,1,2,2,0,0,0,0),
-        listOf(0,0,0,0,0,1,1,1,2,2,0,0,0,0,0),
-        listOf(0,0,0,0,0,0,1,2,2,0,0,0,0,0,0),
-        listOf(0,0,0,0,0,0,0,2,0,0,0,0,0,0,0),
-        listOf(0,0,0,0,0,0,0,0,0,0,0,0,0,0,0),
+// prints pixel heart
+val map = arrayListOf(
+    listOf(0,0,0,0,0,0,0,0,0,0,0,0,0,0,0),
+    listOf(0,0,0,1,1,1,0,0,0,1,2,2,0,0,0),
+    listOf(0,0,1,3,3,1,1,0,1,1,1,2,2,0,0),
+    listOf(0,1,3,3,1,1,1,1,1,1,1,1,2,2,0),
+    listOf(0,1,3,1,1,1,1,1,1,1,1,1,2,2,0),
+    listOf(0,1,1,1,1,1,1,1,1,1,1,1,2,2,0),
+    listOf(0,1,1,1,1,1,1,1,1,1,1,1,2,2,0),
+    listOf(0,0,1,1,1,1,1,1,1,1,1,2,2,0,0),
+    listOf(0,0,0,1,1,1,1,1,1,1,2,2,0,0,0),
+    listOf(0,0,0,0,1,1,1,1,1,2,2,0,0,0,0),
+    listOf(0,0,0,0,0,1,1,1,2,2,0,0,0,0,0),
+    listOf(0,0,0,0,0,0,1,2,2,0,0,0,0,0,0),
+    listOf(0,0,0,0,0,0,0,2,0,0,0,0,0,0,0),
+    listOf(0,0,0,0,0,0,0,0,0,0,0,0,0,0,0),
+)
+
+    //renderImage(getPixelColors("D:/pix.xlsx","editor"))
+    val imageRand = BufferedImage(80,80, TYPE_INT_ARGB)
+
+
+    println(
+        getPixelColors("D:/pix.xlsx","editor")
+            .forEach { elem->
+                println(elem)
+            }
     )
 
-        //renderImage(getPixelColors("D:/pix.xlsx","editor"))
-    val imageRand = BufferedImage(380,380, TYPE_INT_RGB)
-
-
-
-    drawRandImage(imageRand,2,180,20,230)
-    imageRand.desaturate()
-    writeImage(imageRand,"D:/imageRand4.bmp")
-
-    println(toRGB("dd7c2b"))
 
 }
 
@@ -87,18 +96,37 @@ fun renderImage(pixels: ArrayList<List<String>>) {
     writeImage(img,"D:/final.bmp")
 }
 
-fun getPixelColors(input: String, listName: String): ArrayList<List<String>> {
-    val table = FileInputStream(input)
+fun getPixelColors(file: String, listName: String): ArrayList<List<String>> {
+    val table = FileInputStream(file)
     val sheet = WorkbookFactory
                     .create(table)
                     .getSheet(listName)
 
     val rows = sheet.lastRowNum
+    //val cell2 = sheet.getRow(rows).lastCellNum+rows
     val cell2 = sheet.getRow(rows).lastCellNum+rows
 
-    println("Rows: $rows == Cells: $cell2")
 
-    val pixArray:Array<Array<String>> = Array(rows+1) {Array(cell2) {""} } // переделать размеры массива
+    val rowIterator: Iterator<Row> = sheet.iterator()
+    val recordArry: MutableList<Int> = ArrayList()
+
+    while (rowIterator.hasNext()) {
+        val row: Row = rowIterator.next()
+
+        val cellIterator = row.cellIterator()
+        while (cellIterator.hasNext()) {
+            val cell = cellIterator.next()
+            recordArry.add(cell.address.column)
+        }
+
+
+    }
+
+    println(recordArry.maxOf{el->el})
+    val ccc = recordArry.maxOf{el->el}
+    println("Rows: $rows == Cells: ${cell2}")
+
+    val pixArray:Array<Array<String>> = Array(rows+1) {Array(ccc+1) {""} } // переделать размеры массива
 
     for (i: Row in sheet) {
         for (j: Cell in i) {
@@ -115,12 +143,17 @@ fun getPixelColors(input: String, listName: String): ArrayList<List<String>> {
 
     pixArray
         .forEach { rowX ->
-            val rr = rowX.filter { it != "" }
-            if (rr.isNotEmpty()) {
-                final.add(rr)
+//            for (elem in rowX.indices) {
+//                if (rowX[elem] == "") {
+//                    rowX[elem] = "+"
+//                }
+//            }
+
+            if (rowX.isNotEmpty()) {
+                final.add(rowX.toList())
             }
 
-            print(rr)
+            //print(rowX)
         }
 
     return final

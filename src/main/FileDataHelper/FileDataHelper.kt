@@ -19,7 +19,7 @@ import java.nio.charset.StandardCharsets
 
 suspend fun main() {
     GlobalScope.launch {
-        val data = FileDataHelper().getContentAsync("D:/tess.txt")
+        val data = FileDataHelper().getContentAsync("D:/tsdes.txt")
         println(InputStreamReader(data).readLines())
     }.join()
 }
@@ -53,30 +53,27 @@ class FileDataHelper {
            }
     }
 
-    suspend fun writeContentAsync(file: String, data: ByteArray, add: Boolean = false) = coroutineScope {
-        supervisorScope {
-            val dataStr = async(Dispatchers.IO) {
-                FileOutputStream(file, add).write(data)
-            }
-            try {
-                dataStr.await()
-            } catch (ex: Exception) {
-                throw Exception("@ ${ex.message}")
-            }
+    suspend fun writeContentAsync(file: String, data: ByteArray, add: Boolean = false) = supervisorScope {
+        val dataStr = async(Dispatchers.IO) {
+            FileOutputStream(file, add).write(data)
+        }
+        try {
+            dataStr.await()
+        } catch (ex: Exception) {
+            throw Exception("@ ${ex.message}")
         }
     }
 
-    suspend fun getContentAsync(file: String): InputStream = coroutineScope {
+
+    suspend fun getContentAsync(file: String): InputStream = supervisorScope {
         // supervisorScope отменяет только текущую корутину
-        supervisorScope {
-            val dataStr = async(Dispatchers.IO) {
-                FileInputStream(file)
-            }
-            try {
-                dataStr.await()
-            } catch (ex: Exception) {
-                throw Exception("@ ${ex.message}")
-            }
+        val dataStr = async(Dispatchers.IO) {
+            FileInputStream(file)
+        }
+        try {
+            dataStr.await()
+        } catch (ex: Exception) {
+            throw Exception("@ ${ex.message}")
         }
     }
 

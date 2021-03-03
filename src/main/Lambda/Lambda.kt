@@ -4,19 +4,21 @@ import HttpRequest.RequestHelper
 import HttpRequestAsync.getHttpAsync
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
-import java.awt.Color
-import java.math.BigInteger
-import java.security.MessageDigest
-import java.util.concurrent.Callable
+import kotlinx.coroutines.future.await
+import java.net.URI
+import java.net.http.HttpClient
+import java.net.http.HttpRequest
+import java.net.http.HttpResponse
 import java.util.concurrent.CompletableFuture
-import java.util.function.Supplier
-import java.util.stream.Collectors
-import kotlin.random.Random
 import kotlin.system.measureTimeMillis
-import java.util.concurrent.ForkJoinPool
-import java.util.concurrent.ExecutionException
-
-import java.util.stream.IntStream
+import java.net.http.HttpResponse.BodyHandlers
+import java.time.Duration
+import java.util.*
+import java.util.concurrent.ExecutorService
+import java.util.concurrent.Executors
+import java.util.stream.Collectors
+import kotlin.coroutines.resume
+import kotlin.coroutines.suspendCoroutine
 
 
 /*
@@ -30,77 +32,30 @@ import java.util.stream.IntStream
 const val URL = "https://jsonplaceholder.typicode.com/comments"
 
 fun main() {
-
-    val asyncTime = measureTimeMillis {
-        val result = (1..10).toList()
-            .map {
-                getHttpAsync("$URL/$it")
-            }
-        result.forEach { println(it) }
+val httpClient:HttpClient = HttpClient.newBuilder().build()
+val result = measureTimeMillis {
+    runBlocking {
+        val res =(1..10).toList()
+            .map { async { getMyData(httpClient, "$URL/$it") } }
+            .awaitAll()
+        println(res)
     }
-    println("Асинхронный запрос время $asyncTime мс")
-
-//    val parallelHttpTime = measureTimeMillis {
-//        runBlocking {
-//            println(parallelHttp(1..10))
-//        }
-//    }
-//    println("ParallelHttp: $parallelHttpTime ms")
-//
-//    val time3 = measureTimeMillis {
-//        runBlocking {
-//            httpFlow()
-//                .conflate()
-//                .collect{ value -> println(value) }
-//        }
-//    }
-//
-//    println("ParallelHttp: $time3 ms")
-//
-//    val time4 = measureTimeMillis {
-//        runBlocking {
-//            val res = withContext(Dispatchers.IO) {
-//                val res = (1..10).toList()
-//                    .map { RequestHelper().getData("https://jsonplaceholder.typicode.com/comments/$it") }
-//            }
-//
-//            println(res)
-//        }
-//    }
-//
-//    val time5 = measureTimeMillis {
-//        runBlocking {
-//           println(asyncHttp(20 downTo 10))
-//        }
-//    }
-//
-//    val time6 = measureTimeMillis {
-//        runBlocking {
-//            val res2 = (20 downTo 10)
-//                .parallelMap {
-//                    RequestHelper().getData("https://jsonplaceholder.typicode.com/comments/$it")
-//                }
-//        }
-//    }
-
-    val fibonacci = sequence<Int> {
-        var cur = 1
-        var next = 1
-        while (true) {
-            yield(cur) // суспенд, ждет когда попросят выолнения
-            val tmp = cur + next
-            cur = next
-            next = tmp
-        }
-    }
-
+}
+println("Time for requests: $result")
 }
 
-//suspend fun loadComment(id: Int): String? =
-//    withContext(Dispatchers.Default) {
-//        getHttpAsync("https://jsonplaceholder.typicode.com/comments/$id")
-//    }
+suspend fun getMyData(httpClient: HttpClient, url: String): String? =
+    suspendCoroutine {
+        val httpRequest = HttpRequest.newBuilder().uri(URI.create(url)).build()
+        httpClient.sendAsync(httpRequest, HttpResponse.BodyHandlers.ofString())
+            .thenApply { obj -> it.resume(obj.body()) }
+}
 
+suspend fun getData(httpClient: HttpClient, url: String): String? {
+    val httpRequest = HttpRequest.newBuilder().uri(URI.create(url)).build()
+    return httpClient.sendAsync(httpRequest, HttpResponse.BodyHandlers.ofString())
+        .await().body()
+}
 
 inline fun loadCallback(link: String, callback: (String?) -> Unit) {
     callback(RequestHelper().getData(link))
@@ -127,12 +82,6 @@ fun httpFlow(): Flow<String> = flow {
         emit(RequestHelper().getData("https://jsonplaceholder.typicode.com/comments/$i"))
     }
 }.flowOn(Dispatchers.IO)
-
-
-// медленная из-за отсутствия dispatchers.io
-suspend fun <A, B> Iterable<A>.pmap(f: suspend (A) -> B): List<B> = coroutineScope {
-    map { async { f(it) } }.awaitAll()
-}
 
 
 var miletokm = { miles: Int ->

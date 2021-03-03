@@ -10,13 +10,12 @@ import kotlin.coroutines.resumeWithException
 import kotlin.coroutines.suspendCoroutine
 import java.net.http.HttpResponse.BodyHandlers
 import java.net.http.HttpRequest
+import java.net.CookieStore
+
+
+
 
 fun main() {
-
-    runBlocking {
-        val data = RequsetAsync().getDataAsync("https://jsonplaceholder.typicode.com/todos/1")
-        println(data)
-    }
 
     println(
         getHttpAsync("https://jsonplaceholder.typicode.com/todos/1")

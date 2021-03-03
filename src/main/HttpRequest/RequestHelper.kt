@@ -28,21 +28,19 @@ class RequestHelper {
             "Chrome/87.0.4280.141 Safari/537.36"
 
     fun getData(url: String, userAgent: String = userAgentHeader): String {
-        lateinit var text: String
+        lateinit var response: String
 
         with(URL(url).openConnection() as HttpURLConnection) {
             addRequestProperty("User-Agent", userAgent)
 
-            try {
-                text = inputStream.bufferedReader().readText()
-            } catch (ex: Exception) {
-                text = """{"result" : "Can't get data from url", "url" : "${url}", "message" : "${ex.localizedMessage}"}"""
-            } finally {
-                disconnect()
+            response = when(responseCode) {
+                200 -> inputStream.bufferedReader().readText()
+                else -> """{"result" : "Can't get data from url", "url" : "${url}", "message" : "${responseMessage}"}"""
             }
+            disconnect()
 
         }
-        return text
+        return response
     }
 
 }

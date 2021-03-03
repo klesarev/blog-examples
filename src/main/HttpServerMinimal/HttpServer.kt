@@ -2,9 +2,33 @@ package HttpServerMinimal
 
 import com.sun.net.httpserver.HttpServer
 import java.io.OutputStream
+import java.lang.IllegalArgumentException
 import java.net.InetSocketAddress
 import java.util.concurrent.Executors
 import java.util.concurrent.ThreadPoolExecutor
+import javax.sound.midi.MidiDevice
+import javax.sound.sampled.*
+import javax.sound.sampled.LineUnavailableException
+
+import javax.sound.sampled.FloatControl
+
+import javax.sound.sampled.Clip
+
+import javax.sound.sampled.AudioSystem
+
+import javax.sound.sampled.Mixer
+import javax.sound.sampled.Port
+
+
+
+
+
+
+
+
+/*
+* https://www.coderanch.com/t/492931/java/Adjusting-master-volume-Windows-XP
+* */
 
 val threadPool = Executors.newFixedThreadPool(10) as ThreadPoolExecutor
 
