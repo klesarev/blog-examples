@@ -1,8 +1,6 @@
 package FileDataHelper
 
 import kotlinx.coroutines.*
-import org.apache.commons.compress.utils.IOUtils.toByteArray
-import org.apache.commons.io.IOUtils.toInputStream
 import java.io.*
 import java.lang.Exception
 import java.lang.Runnable
@@ -13,68 +11,43 @@ import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 import kotlin.coroutines.suspendCoroutine
 import java.io.InputStream
-import java.io.ByteArrayInputStream
-import java.nio.charset.StandardCharsets
-
 
 suspend fun main() {
-    GlobalScope.launch {
-        val data = FileDataHelper().getContentAsync("D:/tsdes.txt")
-        println(InputStreamReader(data).readLines())
-    }.join()
+    withContext(Dispatchers.Default) {
+        val f = FileDataHelper.getContentAsync("D:/tesst.txt")
+        when(f) {
+            is Result.Success -> println(InputStreamReader(f.data as InputStream).readText())
+            is Result.Error -> println(f.error::class.java)
+        }
+    }
+}
+
+sealed class Result<out T> {
+    class Success<out T>(val data: T) : Result<T>()
+    class Error<E>(val error: E): Result<E>()
 }
 
 class FileDataHelper {
 
-    suspend fun getContent(source: String): String {
-        lateinit var reader: BufferedReader
-
-        return suspendCoroutine { continuation ->
-            Thread(Runnable{
+    companion object {
+        suspend fun getContentAsync(file: String): Result<Any> = supervisorScope {
+            async(Dispatchers.IO) {
                 try {
-                    reader = Files.newBufferedReader(Paths.get(source))
-                    continuation.resume(reader.use { it.readText() })
-                } catch (error: IOException) {
-                    error.printStackTrace()
-                    continuation.resumeWithException(error)
+                    Result.Success(FileInputStream(file))
+                } catch (ex: Exception) {
+                    Result.Error(ex)
                 }
-            }).start()
+            }.await()
+        }
+
+        suspend fun writeContentAsync(file: String, data: ByteArray, add: Boolean = false) = supervisorScope {
+            async(Dispatchers.IO) {
+                try {
+                    FileOutputStream(file, add).write(data)
+                } catch (ex: Exception) {
+                    throw Exception("@ ${ex.message}")
+                }
+            }
         }
     }
-
-    fun writeContent(source: String, content: String) {
-           try {
-               Files.write(Paths.get(source), content.toByteArray(),
-                   StandardOpenOption.APPEND,
-                   StandardOpenOption.CREATE
-               )
-           } catch (error: IOException) {
-               error.printStackTrace()
-           }
-    }
-
-    suspend fun writeContentAsync(file: String, data: ByteArray, add: Boolean = false) = supervisorScope {
-        val dataStr = async(Dispatchers.IO) {
-            FileOutputStream(file, add).write(data)
-        }
-        try {
-            dataStr.await()
-        } catch (ex: Exception) {
-            throw Exception("@ ${ex.message}")
-        }
-    }
-
-
-    suspend fun getContentAsync(file: String): InputStream = supervisorScope {
-        // supervisorScope отменяет только текущую корутину
-        val dataStr = async(Dispatchers.IO) {
-            FileInputStream(file)
-        }
-        try {
-            dataStr.await()
-        } catch (ex: Exception) {
-            throw Exception("@ ${ex.message}")
-        }
-    }
-
 }

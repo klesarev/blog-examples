@@ -8,42 +8,81 @@ import org.bouncycastle.util.encoders.Hex
 import java.awt.Color
 import java.awt.image.BufferedImage
 import java.io.File
+import java.io.FileOutputStream
+import java.lang.StringBuilder
 import javax.imageio.ImageIO
 
 
 fun main() {
 
 
-    val s =   Hex.toHexString("kotlin".toByteArray())
+//    val s =   Hex.toHexString("kotlin".toByteArray())
+//
+//
+//    val res = html {
+//        head {
+//            title {+"XML encoding with Kotlin"}
+//            meta { +"dfgdfg"
+//                attributes["description"] = "some desc!!!!"
+//            }
+//
+//        }
+//        body {
+//            p { attributes["class"] = "text_edd"
+//                attributes["id"] = "text_id"
+//                +"sdfsdfsd"
+//
+//                    for (arg in attributes)
+//                        +"${arg}"
+//
+//            }
+//        }
+//        foter {
+//            +"dfd"
+//        }
+//    }
+//    println(res)
 
 
-    val res = html {
-        head {
-            title {+"XML encoding with Kotlin"}
-            meta { +"dfgdfg"
-                attributes["description"] = "some desc!!!!"
-            }
-
-        }
-        body {
-            p { attributes["class"] = "text_edd"
-                attributes["id"] = "text_id"
-                +"sdfsdfsd"
-
-                    for (arg in attributes)
-                        +"${arg}"
-
-            }
-        }
-        foter {
-            +"dfd"
-        }
-    }
-    println(res)
 
     // 1111 1111 1111 1111 1111 1111 1111 1111 (FFFFFFFF)
     // 1111 1111 0000 0000 0000 0000 0000 0000 (FF000000)
     // 1111 1111 0000 0000 0000 0000           (FF0000)
+
+
+    val fw = File("D:/test.txt")
+    val str = StringBuilder()
+
+    println("Input A:")
+    val a = readLine()!!.toInt()
+    println("Input B:")
+    val b = readLine()!!.toInt()
+
+    if (a < b) {
+        println("Количество символов")
+        val count = readLine()!!.toInt()
+        for (i in 0 until count) {
+            str.append("${(a..b).random()},")
+        }
+    }
+    fw.printWriter().use {
+        it.write(str.toString().substring(0,str.length-1))
+    }
+
+
+
+    val f = File("D:/test.txt")
+            .readText()
+            .split(",")
+
+    val positiveList = f.filter { it.replace(" ","").toInt() >= 0 }
+    val negativeList = f.filter { it.replace(" ","").toInt() < 0 }
+
+    when {
+        positiveList.size > negativeList.size -> println("Больше положительных")
+        positiveList.size < negativeList.size -> println("Меньше положительных")
+        else -> println("Поровну")
+    }
 
 
 }

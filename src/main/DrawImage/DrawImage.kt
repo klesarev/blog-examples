@@ -68,21 +68,21 @@ val map = arrayListOf(
 
 }
 
-suspend fun matrix2D(file: String, delimiter: String): ArrayList<List<Int>> {
-    val list = arrayListOf<List<Int>>()
-
-    FileDataHelper().getContentAsync(file).use { matrix ->
-        matrix.bufferedReader().lines().forEach { row ->
-            list.add(
-                row.split(delimiter)
-                    .map { it }
-                    .filter { it != "" }
-                    .map { it.toInt() }
-            )
-        }
-    }
-    return list
-}
+//suspend fun matrix2D(file: String, delimiter: String): ArrayList<List<Int>> {
+//    val list = arrayListOf<List<Int>>()
+//
+//    FileDataHelper().getContentAsync(file).use { matrix ->
+//        matrix.bufferedReader().lines().forEach { row ->
+//            list.add(
+//                row.split(delimiter)
+//                    .map { it }
+//                    .filter { it != "" }
+//                    .map { it.toInt() }
+//            )
+//        }
+//    }
+//    return list
+//}
 
 fun renderImage(pixels: ArrayList<List<String>>) {
     val img = BufferedImage(100,100, TYPE_INT_RGB)

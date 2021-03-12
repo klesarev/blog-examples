@@ -53,6 +53,7 @@ class RequsetAsync {
     }
 }
 
+
 fun getHttpAsync(link: String): String? {
     val client = HttpClient.newBuilder().build()
     val request = HttpRequest.newBuilder()
