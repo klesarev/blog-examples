@@ -21,17 +21,9 @@ import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 
 
-/*
-* Рассматриваем parallestream, pmap и flow.
-* Flow выаполняется постепенно и сразу
-* parallelStream быстрее в 2 раза чем pmap
-* */
-
-
-
 const val URL = "https://jsonplaceholder.typicode.com/comments"
 
-fun main() {
+suspend fun main() {
 val httpClient:HttpClient = HttpClient.newBuilder().build()
 val result = measureTimeMillis {
     runBlocking {
@@ -42,7 +34,20 @@ val result = measureTimeMillis {
     }
 }
 println("Time for requests: $result")
+
+    loadCallback("$URL/2") { res ->
+        println(
+            getMyData(httpClient,res).let {
+                it?.substring(20)
+            }
+        )
+    }
+
+
+
 }
+
+
 
 suspend fun getMyData(httpClient: HttpClient, url: String): String? =
     suspendCoroutine {
@@ -57,8 +62,8 @@ suspend fun getData(httpClient: HttpClient, url: String): String? {
         .await().body()
 }
 
-inline fun loadCallback(link: String, callback: (String?) -> Unit) {
-    callback(RequestHelper().getData(link))
+inline fun <T, V>loadCallback(data: T, callback: (T) -> V) {
+    callback(data)
 }
 
 suspend fun <T>parallelHttp(range: Iterable<T>) = coroutineScope {
