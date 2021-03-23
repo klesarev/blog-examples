@@ -1,21 +1,11 @@
-package Binary
+package cs
 
 import DSL.*
-import kotlinx.serialization.json.JsonNull.content
-import org.apache.batik.svggen.font.table.Table.head
-import org.apache.commons.codec.binary.Hex.encodeHexString
-import org.bouncycastle.util.encoders.Hex
-import java.awt.Color
-import java.awt.image.BufferedImage
-import java.io.File
-import java.io.FileOutputStream
-import java.lang.StringBuilder
-import javax.imageio.ImageIO
+import java.math.BigInteger
 
 
 fun main() {
-
-    println(fibonacci.take(4).toList())
+    println(factorial.take(20).toList())
 }
 
 val fibonacci = sequence {
@@ -27,6 +17,18 @@ val fibonacci = sequence {
         val next = Pair(x + y, (x + y) + y)
         yield(start)
         start = next
+    }
+}
+
+val factorial = sequence {
+
+    var fn = 1
+    var res: BigInteger = BigInteger.ONE
+
+    while (true) {
+        yield(res)
+        fn++
+        res = res.multiply(fn.toBigInteger())
     }
 }
 
